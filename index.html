@@ -14,6 +14,12 @@
   html,body{height:100%;overflow:hidden;background:#062b2e;}
   body{font-family:Tahoma,'MS Sans Serif',Geneva,sans-serif;font-size:13px;
        -webkit-font-smoothing:none;cursor:default;}
+  /* static wallpaper shown if the 3D scene can't run */
+  body.no3d{background:
+    linear-gradient(180deg,rgba(255,113,206,.18),transparent 40%),
+    linear-gradient(160deg,#0e7b7b,#062b2e 72%);}
+  body.no3d #scene{display:none;}
+
   #scene{position:fixed;inset:0;z-index:0;}
   #scene canvas{display:block;}
   #crt{position:fixed;inset:0;z-index:200;pointer-events:none;
@@ -21,8 +27,8 @@
   #crt::after{content:'';position:absolute;inset:0;
     background:radial-gradient(ellipse at center,transparent 58%,rgba(0,0,10,.42) 100%);}
   #boot{position:fixed;inset:0;z-index:300;background:#000;color:#bdbdbd;
-    font-family:'VT323',monospace;font-size:clamp(15px,2.4vw,21px);
-    padding:32px;white-space:pre-wrap;line-height:1.35;}
+    font-family:'VT323',monospace;font-size:clamp(14px,2.4vw,21px);
+    padding:24px;white-space:pre-wrap;line-height:1.35;}
   #boot .amber{color:#ffb000;}
   #boot.done{animation:bootout .5s steps(4) forwards;}
   @keyframes bootout{to{opacity:0;visibility:hidden;}}
@@ -31,7 +37,20 @@
     background:rgba(0,20,22,.55);border:1px solid var(--y2k-cyan);
     padding:4px 14px;letter-spacing:1px;animation:blinkin 1.4s steps(2) infinite;}
   @keyframes blinkin{50%{opacity:.45;}}
-  .win{position:fixed;min-width:260px;max-width:min(560px,92vw);
+
+  /* fallback HTML desktop icons (only shown when 3D is off) */
+  #desktop-icons{position:fixed;top:16px;left:16px;z-index:7;display:none;
+    flex-direction:column;gap:14px;}
+  body.no3d #desktop-icons{display:flex;}
+  .dicon{width:84px;display:flex;flex-direction:column;align-items:center;gap:5px;
+    cursor:pointer;color:#fff;text-align:center;font-size:11px;
+    text-shadow:1px 1px 0 #000,0 0 4px rgba(0,0,0,.7);}
+  .dicon .di{font-size:40px;line-height:1;}
+  .dicon .lbl{padding:1px 5px;}
+  .dicon:hover .lbl,.dicon:focus .lbl{background:#000080;text-shadow:none;
+    outline:1px dotted #fff;outline-offset:-3px;}
+
+  .win{position:fixed;min-width:240px;max-width:min(560px,92vw);
     background:var(--face);z-index:20;display:none;
     border:2px solid;border-color:var(--hi) var(--dk) var(--dk) var(--hi);
     box-shadow:1px 1px 0 var(--sh),6px 8px 0 rgba(0,0,0,.35);}
@@ -54,7 +73,7 @@
   .notepad h2{font-size:22px;color:var(--title-a);margin-bottom:6px;}
   .notepad p{margin-bottom:10px;}
   .notepad .k{color:#7a007a;}
-  .files{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));
+  .files{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));
     gap:10px;background:#fff;padding:14px;
     border:2px solid;border-color:var(--sh) var(--hi) var(--hi) var(--sh);}
   .file{display:flex;flex-direction:column;align-items:center;gap:5px;
@@ -66,29 +85,33 @@
   .pdetail.open{display:block;}
   .pdetail b{color:var(--title-a);}
   .stack{font-family:'VT323',monospace;font-size:15px;color:#7a007a;}
-  .btn95{display:inline-block;margin-top:8px;padding:4px 14px;background:var(--face);
-    border:2px solid;border-color:var(--hi) var(--dk) var(--dk) var(--hi);
+  .btn95{display:inline-block;margin-top:8px;margin-right:6px;padding:4px 14px;
+    background:var(--face);border:2px solid;
+    border-color:var(--hi) var(--dk) var(--dk) var(--hi);
     font-size:12px;cursor:pointer;text-decoration:none;color:#000;}
   .btn95:active{border-color:var(--dk) var(--hi) var(--hi) var(--dk);}
   .crow{display:flex;gap:8px;margin-bottom:8px;align-items:center;}
   .crow .lbl{width:64px;font-size:12px;}
   .crow .val{flex:1;background:#fff;padding:5px 8px;font-family:'VT323',monospace;
     font-size:16px;border:2px solid;border-color:var(--sh) var(--hi) var(--hi) var(--sh);}
+  .pdfframe{width:100%;height:min(52vh,420px);background:#fff;
+    border:2px solid;border-color:var(--sh) var(--hi) var(--hi) var(--sh);}
+
   #taskbar{position:fixed;left:0;right:0;bottom:0;height:34px;z-index:100;
     background:var(--face);display:flex;align-items:center;gap:5px;padding:0 4px;
     border-top:2px solid var(--hi);}
   #startbtn{display:flex;align-items:center;gap:5px;font-weight:bold;font-size:12px;
-    padding:3px 9px;background:var(--face);cursor:pointer;
+    padding:3px 9px;background:var(--face);cursor:pointer;white-space:nowrap;
     border:2px solid;border-color:var(--hi) var(--dk) var(--dk) var(--hi);}
   #startbtn:active,#startbtn.on{border-color:var(--dk) var(--hi) var(--hi) var(--dk);}
   #startbtn .logo{font-family:'VT323',monospace;color:var(--grid-magenta);font-size:17px;}
   #tabs{flex:1;display:flex;gap:4px;overflow:hidden;}
-  .tab{max-width:150px;flex:1 1 110px;font-size:11px;padding:3px 8px;cursor:pointer;
+  .tab{max-width:150px;flex:1 1 90px;font-size:11px;padding:3px 8px;cursor:pointer;
     overflow:hidden;white-space:nowrap;text-overflow:ellipsis;background:var(--face);
     border:2px solid;border-color:var(--hi) var(--dk) var(--dk) var(--hi);}
   .tab.active{border-color:var(--dk) var(--hi) var(--hi) var(--dk);
     background:repeating-conic-gradient(var(--face) 0 25%,#d6d6d6 0 50%) 0 0/4px 4px;font-weight:bold;}
-  #clock{font-size:11px;padding:3px 10px;
+  #clock{font-size:11px;padding:3px 10px;white-space:nowrap;
     border:2px solid;border-color:var(--sh) var(--hi) var(--hi) var(--sh);}
   #startmenu{position:fixed;left:4px;bottom:36px;width:210px;z-index:110;display:none;
     background:var(--face);border:2px solid;border-color:var(--hi) var(--dk) var(--dk) var(--hi);}
@@ -102,33 +125,39 @@
   #startmenu li:hover{background:var(--title-a);color:#fff;}
   #startmenu li.sep{border-top:1px solid var(--sh);border-bottom:1px solid var(--hi);
     padding:0;height:0;margin:3px 0;}
-  @media (max-width:600px){
-    .win{left:4vw !important;right:4vw;top:12vh !important;max-width:92vw;min-width:0;}
-    #hint{font-size:14px;width:max-content;max-width:90vw;text-align:center;}
-  }
-  @media (prefers-reduced-motion:reduce){ #hint{animation:none;} }
 
-  /* floating 3D-icon captions (classic desktop label look) */
   #icon-labels{position:fixed;inset:0;z-index:6;pointer-events:none;}
   .ilabel{position:absolute;transform:translate(-50%,0);white-space:nowrap;
     font-family:Tahoma,'MS Sans Serif',sans-serif;font-size:12px;color:#fff;
     padding:1px 6px;letter-spacing:.3px;text-align:center;
-    text-shadow:1px 1px 0 #000, 0 0 4px rgba(0,0,0,.7);
-    transition:opacity .2s;}
-  .ilabel.hot{background:#000080;text-shadow:none;
-    outline:1px dotted #fff;outline-offset:-3px;}
+    text-shadow:1px 1px 0 #000, 0 0 4px rgba(0,0,0,.7);transition:opacity .2s;}
+  .ilabel.hot{background:#000080;text-shadow:none;outline:1px dotted #fff;outline-offset:-3px;}
 
-  /* embedded résumé viewer */
-  .pdfframe{width:100%;height:min(52vh,420px);background:#fff;
-    border:2px solid;border-color:var(--sh) var(--hi) var(--hi) var(--sh);}
+  /* ---------- responsive: phones / small screens ---------- */
+  @media (max-width:600px){
+    .win{left:3vw !important;right:3vw;top:9vh !important;max-width:94vw;min-width:0;}
+    .wbody{max-height:64vh;}
+    .notepad{font-size:16px;}
+    .notepad h2{font-size:19px;}
+    .tab{flex-basis:64px;font-size:10px;padding:3px 5px;}
+    #startbtn{font-size:11px;padding:3px 7px;}
+    #clock{padding:3px 7px;}
+    #hint{font-size:13px;width:max-content;max-width:92vw;text-align:center;}
+    #desktop-icons{top:10px;left:10px;gap:10px;}
+    .dicon{width:72px;font-size:10px;}
+    .dicon .di{font-size:34px;}
+    .files{grid-template-columns:repeat(auto-fill,minmax(80px,1fr));}
+  }
+  @media (prefers-reduced-motion:reduce){ #hint{animation:none;} }
 </style>
 </head>
 <body>
 <div id="boot"></div>
 <div id="scene"></div>
 <div id="hint">CLICK A FLOATING OBJECT TO OPEN IT ▒</div>
-<div id="crt"></div>
+<div id="desktop-icons"></div>
 <div id="icon-labels"></div>
+<div id="crt"></div>
 <div id="windows-root"></div>
 
 <div id="taskbar">
@@ -141,24 +170,21 @@
   <ul id="startlist"></ul>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- NOTE: three.js is NOT loaded with a blocking <script src> anymore. It's loaded
+     dynamically at the bottom of the engine so the desktop boots instantly even on
+     slow connections, and falls back gracefully if it can't load. -->
 <script>
 /* ╔══════════════════════════════════════════════════════════════════╗
    ║  CONFIG — THIS IS THE ONLY PART YOU NEED TO EDIT.                  ║
-   ║  Add/remove windows, projects, and 3D icons here. The engine       ║
-   ║  below the "DO NOT EDIT" line reads everything from this object.    ║
    ╚══════════════════════════════════════════════════════════════════╝ */
 const CONFIG = {
 
-  /* ---- scene look ---- */
-  scene: {
-    sky:        0x0e7b7b,   // background + fog color
-    gridMain:   0xff71ce,   // floor grid lines (near)
-    gridSub:    0x0a5e5e,   // floor grid lines (far)
-    sunDisc:    0xffb000,   // the big horizon sun
-  },
+  scene: { sky:0x0e7b7b, gridMain:0xff71ce, gridSub:0x0a5e5e, sunDisc:0xffb000 },
 
-  /* ---- BIOS boot text. Wrap a line in <span class='amber'>…</span> to highlight ---- */
+  /* set true to force the 3D scene to attempt loading even on small phones.
+     Left false, phones still TRY 3D but fall back instantly if it struggles. */
+  force3D: false,
+
   boot: [
     "AMANDA-OS BIOS v4.0  (C) 1995–2026 Third Space Systems",
     "CPU: Imagination(tm) @ ∞ MHz",
@@ -170,8 +196,6 @@ const CONFIG = {
     "<span class='amber'>Starting AMANDA-OS...</span>",
   ],
 
-  /* ---- WINDOWS. type = 'text' | 'projects' | 'contact'.
-         x / y are starting position in vw / vh. ---- */
   windows: [
     { id:"win-about", icon:"▣", title:"ABOUT.TXT — Notepad", menu:"About me",
       x:7, y:11, open:false, type:"text",
@@ -180,11 +204,9 @@ const CONFIG = {
         paras:[
           "Hi, I'm <span class='k'>Amanda</span> — founder of Third Space, a consultancy for practical AI implementation and workflow automation. I also run <span class='k'>talktorobots.org</span>, an AI literacy nonprofit, and I teach, speak, and build a lot of small weird internet things on purpose.",
           "This portfolio runs on AMANDA-OS: one part Windows 95, one part WebGL, zero parts taking itself too seriously.",
-          "<span class='k'>&gt; Last modified: 06/13/2026 — 88,640 bytes</span>",
+          "<span class='k'>&gt; Last modified: 06/15/2026 — 88,640 bytes</span>",
         ],
-        // EDIT HERE — your résumé. Drop a resume.pdf next to index.html, or paste a
-        // Google Drive / hosted PDF link here. Opens in a new tab.
-        button:{ label:"📄 Open résumé", href:"resume.pdf" }
+        button:{ label:"🔗 Find me on LinkedIn", href:"https://www.linkedin.com/in/amandagrutza/" }
       }
     },
 
@@ -195,25 +217,48 @@ const CONFIG = {
       x:14, y:24, open:false, type:"contact",
       content:{
         rows:[
-          { lbl:"Email:",  val:"ops@thirdspaced.com" },
+          { lbl:"Email:",  val:"hello@thirdspace.example" },
           { lbl:"Web:",    val:"talktorobots.org" },
-          { lbl:"Status:", val:"ONLINE ▮ open for select projects (june 26)" },
+          { lbl:"Status:", val:"ONLINE ▮ accepting projects" },
         ],
         button:{ label:"Send mail ►", href:"mailto:hello@thirdspace.example" }
       }
     },
 
-    { id:"win-resume", icon:"≣", title:"RESUME.PDF", menu:"Résumé",
-      x:50, y:20, open:false, type:"resume",
+    /* ── RÉSUMÉ — temporary LinkedIn version while a new résumé is in progress ──
+       When the new résumé PDF is ready, swap this whole window entry for the
+       embedded-PDF version saved in the note just below, and drop resume.pdf
+       next to index.html. The 'resume' window type + PDF viewer are still built
+       into the engine, so switching back is a copy-paste. */
+    { id:"win-resume", icon:"≣", title:"RESUME.LNK", menu:"Résumé",
+      x:50, y:20, open:false, type:"text",
       content:{
-        href:"https://www.linkedin.com/in/amandagrutza/",     // EDIT HERE — drop resume.pdf next to index.html, or paste a link
-        embed:false,            // Change to false for external links like LinkedIn
-        button:"📄 Open in new tab",
-        note:"My résumé can be found on LinkedIn.",
-        fallback:"Résumé viewer is ready. Drop <span class='k'>resume.pdf</span> next to index.html (or set a link in <span class='k'>CONFIG</span>) and it'll display right here. Until then, this is the placeholder.",
+        file:"RESUME",
+        paras:[
+          "A résumé built specifically for this site is currently in progress.",
+          "In the meantime, for more granular detail on my background, roles, and experience, you can find the full picture on my LinkedIn:",
+        ],
+        button:{ label:"🔗 View LinkedIn", href:"https://www.linkedin.com/in/amandagrutza/" }
       }
-}
     },
+
+    /* ┌──────────────────────────────────────────────────────────────────┐
+       │  SAVED FOR LATER — embedded PDF résumé (currently disabled).       │
+       │  To re-enable: delete the RESUME.LNK window above and paste this   │
+       │  in its place, then upload resume.pdf next to index.html.          │
+       │                                                                    │
+       │  { id:"win-resume", icon:"≣", title:"RESUME.PDF", menu:"Résumé",    │
+       │    x:50, y:20, open:false, type:"resume",                          │
+       │    content:{                                                        │
+       │      href:"resume.pdf",                                            │
+       │      embed:true,                                                    │
+       │      button:"📄 Open in new tab",                                   │
+       │      note:"My résumé opens as a PDF — click below.",                │
+       │      fallback:"Résumé viewer is ready. Drop resume.pdf next to      │
+       │                index.html and it'll display right here.",           │
+       │    }                                                                │
+       │  },                                                                │
+       └──────────────────────────────────────────────────────────────────┘ */
 
     { id:"win-readme", icon:"?", title:"README — how to remix this", menu:"README",
       x:42, y:9, open:true, type:"text",
@@ -229,10 +274,6 @@ const CONFIG = {
     },
   ],
 
-  /* ---- PROJECTS shown inside the Projects folder.
-         icon  = a glyph
-         link  = single url, OR
-         links = [{label, url}, ...] for multiple buttons ---- */
   projects: [
     { icon:"▦", name:"GOLDRUSH.EXE", title:"Gold Rush History Game",
       desc:"An educational history game with a secret Oregon-Trail-style mode — 13 playable historical figures, trail mechanics, and settlement phases. Choices, consequences, and a suspicious amount of dysentery.",
@@ -260,7 +301,6 @@ const CONFIG = {
         { label:"HubSpot Store", url:"https://ecosystem.hubspot.com/marketplace/listing/safe-merge" },
       ] },
 
-    /* ─── EDIT HERE: still a placeholder — no URL given yet. ─── */
     { icon:"⊜", name:"SOCRATIC.AI", title:"AI as a Socratic Thought Partner",
       desc:"[Placeholder] A framework/tool for using AI to ask the right questions instead of handing over answers — discovery-based learning, not autocomplete. Replace with the real description and link.",
       stack:"TODO — add stack",
@@ -275,11 +315,7 @@ const CONFIG = {
       ] },
   ],
 
-  /* ---- 3D DESKTOP ICONS. Each floating object opens a window.
-         win   = id from CONFIG.windows
-         shape = 'floppy' | 'folder' | 'envelope' | 'cd' | 'paper'
-         label = caption shown floating under the object
-         x,y,z = position in the 3D scene · spin = rotation speed ---- */
+  /* 3D desktop icons. shape = 'floppy'|'folder'|'envelope'|'cd'|'paper' */
   desktop: [
     { win:"win-about",    shape:"floppy",   label:"About Me", x:-4.4, y:1.2, z:0,    spin:0.40 },
     { win:"win-projects", shape:"folder",   label:"Projects", x:0,    y:1.7, z:-1.2, spin:0.55 },
@@ -288,14 +324,26 @@ const CONFIG = {
     { win:"win-resume",   shape:"paper",    label:"Résumé",   x:2.6,  y:3.0, z:-2.0, spin:0.50 },
   ],
 
-  firstOpenDelayMs: 4200,   // when README pops after boot
+  firstOpenDelayMs: 4200,
 };
 
 /* ╔══════════════════════════════════════════════════════════════════╗
    ║   ↓↓↓   DO NOT EDIT BELOW THIS LINE — this is the engine.   ↓↓↓     ║
    ╚══════════════════════════════════════════════════════════════════╝ */
 
-/* ---- 1. BUILD WINDOW DOM FROM CONFIG ---- */
+/* ---- BOOT (runs immediately, never waits on the 3D library) ---- */
+(function(){
+  const bootEl = document.getElementById('boot');
+  let i = 0;
+  (function type(){
+    if(i < CONFIG.boot.length){
+      bootEl.innerHTML += CONFIG.boot[i] + "\n"; i++;
+      setTimeout(type, i < 3 ? 260 : 180);
+    } else setTimeout(()=> bootEl.classList.add('done'), 600);
+  })();
+})();
+
+/* ---- BUILD WINDOWS FROM CONFIG ---- */
 const root = document.getElementById('windows-root');
 function renderBody(w){
   if(w.type === 'text'){
@@ -316,13 +364,12 @@ function renderBody(w){
     return `<div class="wbody pad0"><div class="files" id="filegrid"></div>
             <div class="pdetail" id="pdetail"></div></div>`;
   }
-  if(w.type === 'resume'){
+  if(w.type === 'resume'){           // embedded-PDF résumé (kept for later use)
     const c = w.content;
     const btn = `<a class="btn95" href="${c.href}" target="_blank" rel="noopener">${c.button || '📄 Open résumé'}</a>`;
     const inner = c.embed
       ? `<object class="pdfframe" data="${c.href}" type="application/pdf">
-           <div class="notepad"><p>${c.fallback || ''}</p></div>
-         </object>`
+           <div class="notepad"><p>${c.fallback || ''}</p></div></object>`
       : `<div class="notepad"><p>${c.note || ''}</p></div>`;
     return `<div class="wbody"><div id="resume-viewer">${inner}</div>
             <div style="margin-top:8px">${btn}</div></div>`;
@@ -343,8 +390,7 @@ CONFIG.windows.forEach(w=>{
   root.appendChild(el);
 });
 
-/* if the résumé is set to embed, verify the PDF actually loads;
-   if not (missing file, or local file:// preview), show the friendly fallback */
+/* résumé PDF probe (only acts if an embed résumé window is active) */
 (async function probeResume(){
   const rw = CONFIG.windows.find(w=> w.type === 'resume' && w.content && w.content.embed);
   if(!rw) return;
@@ -354,12 +400,11 @@ CONFIG.windows.forEach(w=>{
     const r = await fetch(rw.content.href, {method:'HEAD'});
     if(!r.ok) throw new Error('missing');
   }catch(e){
-    box.innerHTML = `<div class="notepad"><p>${rw.content.fallback ||
-      "Résumé PDF not found yet."}</p></div>`;
+    box.innerHTML = `<div class="notepad"><p>${rw.content.fallback || "Résumé PDF not found yet."}</p></div>`;
   }
 })();
 
-/* ---- 2. PROJECTS FOLDER content ---- */
+/* ---- PROJECTS FOLDER ---- */
 (function(){
   const grid = document.getElementById('filegrid');
   const detail = document.getElementById('pdetail');
@@ -371,12 +416,10 @@ CONFIG.windows.forEach(w=>{
     f.onclick = ()=>{
       detail.classList.add('open');
       let buttons = '';
-      if(Array.isArray(p.links)){               // multiple labelled buttons
-        buttons = p.links
-          .filter(l=> l.url && l.url !== '#')
-          .map(l=>`<a class="btn95" href="${l.url}" target="_blank" rel="noopener">${l.label} ►</a>`)
-          .join(' ');
-      } else if(p.link && p.link !== '#'){        // single fallback button
+      if(Array.isArray(p.links)){
+        buttons = p.links.filter(l=> l.url && l.url !== '#')
+          .map(l=>`<a class="btn95" href="${l.url}" target="_blank" rel="noopener">${l.label} ►</a>`).join(' ');
+      } else if(p.link && p.link !== '#'){
         buttons = `<a class="btn95" href="${p.link}" target="_blank" rel="noopener">Open ►</a>`;
       }
       detail.innerHTML = `<b>${p.title}</b><br>${p.desc}<br>
@@ -386,7 +429,7 @@ CONFIG.windows.forEach(w=>{
   });
 })();
 
-/* ---- 3. START MENU FROM CONFIG ---- */
+/* ---- START MENU ---- */
 (function(){
   const ul = document.getElementById('startlist');
   CONFIG.windows.forEach(w=>{
@@ -403,178 +446,30 @@ CONFIG.windows.forEach(w=>{
   ul.appendChild(sd);
 })();
 
-/* ---- 4. BOOT SEQUENCE ---- */
+/* ---- FALLBACK DESKTOP ICONS (shown only if 3D can't run) ---- */
 (function(){
-  const bootEl = document.getElementById('boot');
-  let i = 0;
-  (function type(){
-    if(i < CONFIG.boot.length){
-      bootEl.innerHTML += CONFIG.boot[i] + "\n"; i++;
-      setTimeout(type, i < 3 ? 260 : 180);
-    } else setTimeout(()=> bootEl.classList.add('done'), 600);
-  })();
+  const GLYPH = { floppy:'💾', folder:'📁', envelope:'✉️', cd:'💿', paper:'📄' };
+  const layer = document.getElementById('desktop-icons');
+  CONFIG.desktop.forEach(d=>{
+    const el = document.createElement('div');
+    el.className = 'dicon'; el.tabIndex = 0;
+    el.innerHTML = `<span class="di">${GLYPH[d.shape] || '🗔'}</span><span class="lbl">${d.label || ''}</span>`;
+    el.onclick = ()=> openWindow(d.win);
+    el.onkeydown = e=>{ if(e.key === 'Enter') openWindow(d.win); };
+    layer.appendChild(el);
+  });
 })();
 
-/* ---- 5. THREE.JS SCENE ---- */
-const container = document.getElementById('scene');
-const renderer = new THREE.WebGLRenderer({antialias:false});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-renderer.setSize(innerWidth, innerHeight);
-container.appendChild(renderer.domElement);
-
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(CONFIG.scene.sky);
-scene.fog = new THREE.Fog(CONFIG.scene.sky, 14, 34);
-
-const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, .1, 100);
-camera.position.set(0, 1.6, 11);
-
-scene.add(new THREE.AmbientLight(0xffffff, .75));
-const sun = new THREE.DirectionalLight(0xfff3d6, .9); sun.position.set(4,8,6); scene.add(sun);
-const rim = new THREE.DirectionalLight(0xff71ce, .5); rim.position.set(-6,2,-4); scene.add(rim);
-
-const grid3 = new THREE.GridHelper(80, 80, CONFIG.scene.gridMain, CONFIG.scene.gridSub);
-grid3.position.y = -2.2; scene.add(grid3);
-
-const sunDisc = new THREE.Mesh(new THREE.CircleGeometry(5, 32),
-  new THREE.MeshBasicMaterial({color:CONFIG.scene.sunDisc, fog:false, transparent:true, opacity:.85}));
-sunDisc.position.set(0, 2.4, -30); scene.add(sunDisc);
-
-/* ---- 6. SHAPE FACTORY ---- */
-const M = c => new THREE.MeshLambertMaterial({color:c});
-function box(w,h,d,c,x=0,y=0,z=0){
-  const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), M(c));
-  m.position.set(x,y,z); return m;
-}
-const SHAPES = {
-  floppy(){ const g=new THREE.Group();
-    g.add(box(2,2,.22,0x222a86));
-    g.add(box(1.2,.9,.06,0xc8c8c8,0,.5,.13));
-    g.add(box(.45,.6,.02,0x222a86,-.25,.5,.17));
-    g.add(box(1.5,.8,.06,0xfdfdf2,0,-.45,.13));
-    g.add(box(1.3,.1,.02,0xff71ce,0,-.25,.17)); return g; },
-  folder(){ const g=new THREE.Group();
-    g.add(box(2.4,1.6,.3,0xffc94d));
-    g.add(box(1,.35,.3,0xffc94d,-.7,.95,0));
-    g.add(box(2.2,1.3,.12,0xfff3cf,0,-.05,.22)); return g; },
-  envelope(){ const g=new THREE.Group();
-    g.add(box(2.2,1.4,.18,0xf2f2ea));
-    g.add(box(2.2,.12,.2,0xff71ce,0,.64,0));
-    const flap=box(1.55,1.55,.06,0xe2e2d6,0,.18,.1);
-    flap.rotation.z=Math.PI/4; flap.scale.set(1,.62,1); g.add(flap);
-    g.add(box(.5,.34,.04,0x01a0a0,.7,-.4,.12)); return g; },
-  cd(){ const g=new THREE.Group();
-    const disc=new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.1,.07,32),
-      new THREE.MeshPhongMaterial({color:0xd9f6ff, shininess:120, specular:0xff71ce}));
-    disc.rotation.x=Math.PI/2; g.add(disc);
-    const hole=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,.09,16), M(CONFIG.scene.sky));
-    hole.rotation.x=Math.PI/2; g.add(hole); return g; },
-  paper(){ const g=new THREE.Group();
-    g.add(box(1.7,2.2,.08,0xf8f8f0));                 // sheet
-    g.add(box(1.15,.14,.02,0x000080,0,.66,.06));      // title line
-    g.add(box(1.25,.08,.02,0x808080,0,.34,.06));      // body lines
-    g.add(box(1.25,.08,.02,0x808080,0,.16,.06));
-    g.add(box(1.25,.08,.02,0x808080,0,-.02,.06));
-    g.add(box(.75,.08,.02,0x808080,-.25,-.2,.06));
-    g.add(box(1.25,.1,.02,0xff71ce,0,-.55,.06));       // accent line
-    const corner=box(.42,.42,.07,0xd8d8c8,.64,.9,.06); // folded corner
-    corner.rotation.z=Math.PI/4; corner.scale.set(1,.6,1); g.add(corner);
-    return g; },
-};
-
-/* ---- 7. BUILD ICONS FROM CONFIG ---- */
-const icons = [];
-const labelLayer = document.getElementById('icon-labels');
-CONFIG.desktop.forEach(d=>{
-  const make = SHAPES[d.shape] || SHAPES.floppy;
-  const g = make();
-  g.userData = { win:d.win, spin:d.spin, baseY:d.y, phase:Math.random()*Math.PI*2 };
-  g.position.set(d.x, d.y, d.z);
-  scene.add(g); icons.push(g);
-  // floating caption
-  if(d.label){
-    const lab = document.createElement('div');
-    lab.className = 'ilabel';
-    lab.textContent = d.label;
-    labelLayer.appendChild(lab);
-    g.userData.label = lab;
-  }
-});
-
-/* ---- 8. INTERACTION + ANIMATION ---- */
-const ray = new THREE.Raycaster();
-const ptr = new THREE.Vector2(99,99);
-let hovered=null, downPos=null; const par={x:0,y:0};
-addEventListener('pointermove', e=>{
-  ptr.x=(e.clientX/innerWidth)*2-1; ptr.y=-(e.clientY/innerHeight)*2+1;
-  par.x=ptr.x; par.y=ptr.y;
-});
-renderer.domElement.addEventListener('pointerdown', e=>{ downPos=[e.clientX,e.clientY]; });
-renderer.domElement.addEventListener('pointerup', e=>{
-  if(!downPos) return;
-  const moved=Math.hypot(e.clientX-downPos[0], e.clientY-downPos[1]); downPos=null;
-  if(moved>6) return;
-  ptr.x=(e.clientX/innerWidth)*2-1; ptr.y=-(e.clientY/innerHeight)*2+1;
-  ray.setFromCamera(ptr,camera);
-  const hit=ray.intersectObjects(icons,true)[0];
-  if(hit){ let g=hit.object; while(g.parent && !g.userData.win) g=g.parent;
-    if(g.userData.win) openWindow(g.userData.win); }
-});
-const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const clk = new THREE.Clock();
-function animate(){
-  requestAnimationFrame(animate);
-  const t = clk.getElapsedTime();
-  icons.forEach(g=>{
-    if(!reduceMotion){
-      g.rotation.y = t*g.userData.spin;
-      g.position.y = g.userData.baseY + Math.sin(t*1.2+g.userData.phase)*.25;
-    }
-    const s=(g===hovered)?1.18:1;
-    g.scale.lerp(new THREE.Vector3(s,s,s), .15);
-  });
-  ray.setFromCamera(ptr,camera);
-  const hit=ray.intersectObjects(icons,true)[0];
-  let g=hit?hit.object:null; while(g&&g.parent&&!g.userData.win) g=g.parent;
-  hovered=(g&&g.userData.win)?g:null;
-  renderer.domElement.style.cursor = hovered?'pointer':'default';
-  camera.position.x += ((par.x*1.6)-camera.position.x)*.04;
-  camera.position.y += ((1.6+par.y*.8)-camera.position.y)*.04;
-  camera.lookAt(0,1.2,0);
-  updateLabels();
-  renderer.render(scene,camera);
-}
-
-const _lv = new THREE.Vector3();
-function updateLabels(){
-  icons.forEach(g=>{
-    const lab = g.userData.label; if(!lab) return;
-    // project a point ~1.35 units below the (bobbing) object
-    _lv.set(g.position.x, g.position.y - 1.35, g.position.z).project(camera);
-    if(_lv.z > 1){ lab.style.opacity = 0; return; }   // behind camera
-    lab.style.opacity = 1;
-    lab.style.left = ((_lv.x*0.5+0.5)*innerWidth) + 'px';
-    lab.style.top  = ((-_lv.y*0.5+0.5)*innerHeight) + 'px';
-    lab.classList.toggle('hot', g===hovered);
-  });
-}
-
-animate();
-addEventListener('resize', ()=>{
-  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth,innerHeight);
-});
-
-/* ---- 9. WINDOW MANAGER ---- */
-let zTop=20; const tabs=document.getElementById('tabs');
+/* ---- WINDOW MANAGER (works with or without 3D) ---- */
+let zTop = 20; const tabs = document.getElementById('tabs');
 function openWindow(id){
-  const w=document.getElementById(id); if(!w) return;
+  const w = document.getElementById(id); if(!w) return;
   w.classList.add('open'); focusWindow(w);
   if(!tabs.querySelector(`[data-tab="${id}"]`)){
-    const tab=document.createElement('div');
-    tab.className='tab'; tab.dataset.tab=id;
-    tab.textContent=w.querySelector('.ttl').textContent;
-    tab.onclick=()=>{
+    const tab = document.createElement('div');
+    tab.className = 'tab'; tab.dataset.tab = id;
+    tab.textContent = w.querySelector('.ttl').textContent;
+    tab.onclick = ()=>{
       if(w.classList.contains('open') && tab.classList.contains('active')){
         w.classList.remove('open'); tab.classList.remove('active');
       } else { w.classList.add('open'); focusWindow(w); }
@@ -582,13 +477,13 @@ function openWindow(id){
     tabs.appendChild(tab);
   }
   syncTabs();
-  const hint=document.getElementById('hint'); if(hint) hint.style.display='none';
+  const hint = document.getElementById('hint'); if(hint) hint.style.display = 'none';
 }
 function closeWindow(w){
   w.classList.remove('open');
-  const tab=tabs.querySelector(`[data-tab="${w.id}"]`); if(tab) tab.remove();
+  const tab = tabs.querySelector(`[data-tab="${w.id}"]`); if(tab) tab.remove();
 }
-function focusWindow(w){ w.style.zIndex=++zTop; syncTabs(); }
+function focusWindow(w){ w.style.zIndex = ++zTop; syncTabs(); }
 function syncTabs(){
   let top=null, topZ=-1;
   document.querySelectorAll('.win.open').forEach(w=>{
@@ -599,31 +494,31 @@ function syncTabs(){
 }
 document.querySelectorAll('.win').forEach(w=>{
   w.addEventListener('pointerdown', ()=> focusWindow(w));
-  w.querySelector('[data-close]').onclick=()=> closeWindow(w);
-  w.querySelector('[data-min]').onclick=()=>{ w.classList.remove('open'); syncTabs(); };
-  const bar=w.querySelector('.tbar');
+  w.querySelector('[data-close]').onclick = ()=> closeWindow(w);
+  w.querySelector('[data-min]').onclick = ()=>{ w.classList.remove('open'); syncTabs(); };
+  const bar = w.querySelector('.tbar');
   bar.addEventListener('pointerdown', e=>{
     if(e.target.classList.contains('tbtn')) return;
-    const r=w.getBoundingClientRect();
-    const ox=e.clientX-r.left, oy=e.clientY-r.top;
+    const r = w.getBoundingClientRect();
+    const ox = e.clientX - r.left, oy = e.clientY - r.top;
     bar.setPointerCapture(e.pointerId);
-    const move=ev=>{
-      w.style.left=Math.max(0,Math.min(innerWidth-90, ev.clientX-ox))+'px';
-      w.style.top =Math.max(0,Math.min(innerHeight-70, ev.clientY-oy))+'px';
+    const move = ev=>{
+      w.style.left = Math.max(0, Math.min(innerWidth-90,  ev.clientX-ox)) + 'px';
+      w.style.top  = Math.max(0, Math.min(innerHeight-70, ev.clientY-oy)) + 'px';
     };
-    const up=()=>{ bar.removeEventListener('pointermove',move);
-                   bar.removeEventListener('pointerup',up); };
-    bar.addEventListener('pointermove',move);
-    bar.addEventListener('pointerup',up);
+    const up = ()=>{ bar.removeEventListener('pointermove', move);
+                     bar.removeEventListener('pointerup', up); };
+    bar.addEventListener('pointermove', move);
+    bar.addEventListener('pointerup', up);
   });
 });
 CONFIG.windows.filter(w=>w.open).forEach(w=> openWindow(w.id));
 
-/* ---- 10. START MENU / CLOCK ---- */
-const startbtn=document.getElementById('startbtn');
-const startmenu=document.getElementById('startmenu');
+/* ---- START MENU / CLOCK ---- */
+const startbtn = document.getElementById('startbtn');
+const startmenu = document.getElementById('startmenu');
 function closeStart(){ startmenu.classList.remove('open'); startbtn.classList.remove('on'); }
-startbtn.onclick=e=>{ e.stopPropagation();
+startbtn.onclick = e=>{ e.stopPropagation();
   startmenu.classList.toggle('open'); startbtn.classList.toggle('on'); };
 document.addEventListener('click', e=>{
   if(!startmenu.contains(e.target) && e.target!==startbtn) closeStart();
@@ -633,11 +528,190 @@ function tick(){
     new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
 }
 tick(); setInterval(tick, 10000);
-
 setTimeout(()=>{
   const first = CONFIG.windows.find(w=>w.open);
   if(first) openWindow(first.id);
 }, CONFIG.firstOpenDelayMs);
+
+/* ---- 3D FALLBACK HANDLER ---- */
+function fail3D(reason){
+  console.warn('[AMANDA-OS] 3D scene disabled, using desktop fallback:', reason);
+  document.body.classList.add('no3d');
+  const hint = document.getElementById('hint');
+  if(hint) hint.textContent = 'CLICK AN ICON OR OPEN START ▒';
+}
+function hasWebGL(){
+  try{
+    const c = document.createElement('canvas');
+    return !!(window.WebGLRenderingContext &&
+      (c.getContext('webgl') || c.getContext('experimental-webgl')));
+  }catch(e){ return false; }
+}
+
+/* ---- 3D ENGINE (only runs if Three.js + WebGL are available) ---- */
+function init3D(){
+  if(typeof THREE === 'undefined'){ fail3D('three-undefined'); return; }
+  try{
+    const container = document.getElementById('scene');
+    const renderer = new THREE.WebGLRenderer({antialias:false});
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setSize(innerWidth, innerHeight);
+    container.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(CONFIG.scene.sky);
+    scene.fog = new THREE.Fog(CONFIG.scene.sky, 14, 36);
+
+    const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, .1, 100);
+    camera.position.set(0, 1.6, 11);
+    let camZ = 11;
+    function setCam(){
+      const a = innerWidth/innerHeight;
+      camera.aspect = a;
+      // portrait: pull back + widen so all icons stay framed on phones
+      camZ = a < 1 ? 11 + (1/a - 1) * 6 : 11;
+      camera.fov = a < 0.7 ? 58 : 50;
+      camera.position.z = camZ;
+      camera.updateProjectionMatrix();
+    }
+    setCam();
+
+    scene.add(new THREE.AmbientLight(0xffffff, .75));
+    const sun = new THREE.DirectionalLight(0xfff3d6, .9); sun.position.set(4,8,6); scene.add(sun);
+    const rim = new THREE.DirectionalLight(0xff71ce, .5); rim.position.set(-6,2,-4); scene.add(rim);
+
+    const grid3 = new THREE.GridHelper(80, 80, CONFIG.scene.gridMain, CONFIG.scene.gridSub);
+    grid3.position.y = -2.2; scene.add(grid3);
+
+    const sunDisc = new THREE.Mesh(new THREE.CircleGeometry(5, 32),
+      new THREE.MeshBasicMaterial({color:CONFIG.scene.sunDisc, fog:false, transparent:true, opacity:.85}));
+    sunDisc.position.set(0, 2.4, -30); scene.add(sunDisc);
+
+    const M = c => new THREE.MeshLambertMaterial({color:c});
+    function box(w,h,d,c,x=0,y=0,z=0){
+      const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), M(c));
+      m.position.set(x,y,z); return m;
+    }
+    const SHAPES = {
+      floppy(){ const g=new THREE.Group();
+        g.add(box(2,2,.22,0x222a86)); g.add(box(1.2,.9,.06,0xc8c8c8,0,.5,.13));
+        g.add(box(.45,.6,.02,0x222a86,-.25,.5,.17)); g.add(box(1.5,.8,.06,0xfdfdf2,0,-.45,.13));
+        g.add(box(1.3,.1,.02,0xff71ce,0,-.25,.17)); return g; },
+      folder(){ const g=new THREE.Group();
+        g.add(box(2.4,1.6,.3,0xffc94d)); g.add(box(1,.35,.3,0xffc94d,-.7,.95,0));
+        g.add(box(2.2,1.3,.12,0xfff3cf,0,-.05,.22)); return g; },
+      envelope(){ const g=new THREE.Group();
+        g.add(box(2.2,1.4,.18,0xf2f2ea)); g.add(box(2.2,.12,.2,0xff71ce,0,.64,0));
+        const flap=box(1.55,1.55,.06,0xe2e2d6,0,.18,.1);
+        flap.rotation.z=Math.PI/4; flap.scale.set(1,.62,1); g.add(flap);
+        g.add(box(.5,.34,.04,0x01a0a0,.7,-.4,.12)); return g; },
+      cd(){ const g=new THREE.Group();
+        const disc=new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.1,.07,32),
+          new THREE.MeshPhongMaterial({color:0xd9f6ff, shininess:120, specular:0xff71ce}));
+        disc.rotation.x=Math.PI/2; g.add(disc);
+        const hole=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,.09,16), M(CONFIG.scene.sky));
+        hole.rotation.x=Math.PI/2; g.add(hole); return g; },
+      paper(){ const g=new THREE.Group();
+        g.add(box(1.7,2.2,.08,0xf8f8f0));
+        g.add(box(1.15,.14,.02,0x000080,0,.66,.06));
+        g.add(box(1.25,.08,.02,0x808080,0,.34,.06)); g.add(box(1.25,.08,.02,0x808080,0,.16,.06));
+        g.add(box(1.25,.08,.02,0x808080,0,-.02,.06)); g.add(box(.75,.08,.02,0x808080,-.25,-.2,.06));
+        g.add(box(1.25,.1,.02,0xff71ce,0,-.55,.06));
+        const corner=box(.42,.42,.07,0xd8d8c8,.64,.9,.06);
+        corner.rotation.z=Math.PI/4; corner.scale.set(1,.6,1); g.add(corner); return g; },
+    };
+
+    const icons = [];
+    const labelLayer = document.getElementById('icon-labels');
+    CONFIG.desktop.forEach(d=>{
+      const make = SHAPES[d.shape] || SHAPES.floppy;
+      const g = make();
+      g.userData = { win:d.win, spin:d.spin, baseY:d.y, phase:Math.random()*Math.PI*2 };
+      g.position.set(d.x, d.y, d.z);
+      scene.add(g); icons.push(g);
+      if(d.label){
+        const lab = document.createElement('div');
+        lab.className = 'ilabel'; lab.textContent = d.label;
+        labelLayer.appendChild(lab); g.userData.label = lab;
+      }
+    });
+
+    const ray = new THREE.Raycaster();
+    const ptr = new THREE.Vector2(99,99);
+    let hovered=null, downPos=null; const par={x:0,y:0};
+    addEventListener('pointermove', e=>{
+      ptr.x=(e.clientX/innerWidth)*2-1; ptr.y=-(e.clientY/innerHeight)*2+1;
+      par.x=ptr.x; par.y=ptr.y;
+    });
+    renderer.domElement.addEventListener('pointerdown', e=>{ downPos=[e.clientX,e.clientY]; });
+    renderer.domElement.addEventListener('pointerup', e=>{
+      if(!downPos) return;
+      const moved=Math.hypot(e.clientX-downPos[0], e.clientY-downPos[1]); downPos=null;
+      if(moved>8) return;
+      ptr.x=(e.clientX/innerWidth)*2-1; ptr.y=-(e.clientY/innerHeight)*2+1;
+      ray.setFromCamera(ptr,camera);
+      const hit=ray.intersectObjects(icons,true)[0];
+      if(hit){ let g=hit.object; while(g.parent && !g.userData.win) g=g.parent;
+        if(g.userData.win) openWindow(g.userData.win); }
+    });
+
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const clk = new THREE.Clock();
+    const _lv = new THREE.Vector3();
+    function updateLabels(){
+      icons.forEach(g=>{
+        const lab = g.userData.label; if(!lab) return;
+        _lv.set(g.position.x, g.position.y - 1.35, g.position.z).project(camera);
+        if(_lv.z > 1){ lab.style.opacity = 0; return; }
+        lab.style.opacity = 1;
+        lab.style.left = ((_lv.x*0.5+0.5)*innerWidth) + 'px';
+        lab.style.top  = ((-_lv.y*0.5+0.5)*innerHeight) + 'px';
+        lab.classList.toggle('hot', g===hovered);
+      });
+    }
+    function animate(){
+      requestAnimationFrame(animate);
+      const t = clk.getElapsedTime();
+      icons.forEach(g=>{
+        if(!reduceMotion){
+          g.rotation.y = t*g.userData.spin;
+          g.position.y = g.userData.baseY + Math.sin(t*1.2+g.userData.phase)*.25;
+        }
+        const s=(g===hovered)?1.18:1;
+        g.scale.lerp(new THREE.Vector3(s,s,s), .15);
+      });
+      ray.setFromCamera(ptr,camera);
+      const hit=ray.intersectObjects(icons,true)[0];
+      let g=hit?hit.object:null; while(g&&g.parent&&!g.userData.win) g=g.parent;
+      hovered=(g&&g.userData.win)?g:null;
+      renderer.domElement.style.cursor = hovered?'pointer':'default';
+      camera.position.x += ((par.x*1.6)-camera.position.x)*.04;
+      camera.position.y += ((1.6+par.y*.8)-camera.position.y)*.04;
+      camera.lookAt(0,1.2,0);
+      updateLabels();
+      renderer.render(scene,camera);
+    }
+    animate();
+
+    addEventListener('resize', ()=>{
+      setCam();
+      renderer.setSize(innerWidth, innerHeight);
+    });
+  }catch(e){ fail3D(e); }
+}
+
+/* ---- LOAD THREE.JS DYNAMICALLY (non-blocking) + safety net ---- */
+(function load3D(){
+  if(!hasWebGL()){ fail3D('no-webgl'); return; }
+  const s = document.createElement('script');
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+  let settled = false;
+  const giveUp = r=>{ if(settled) return; settled = true; fail3D(r); };
+  s.onload  = ()=>{ if(settled) return; settled = true; init3D(); };
+  s.onerror = ()=> giveUp('cdn-error');
+  setTimeout(()=> giveUp('timeout'), 9000);   // if it hasn't loaded in 9s, fall back
+  document.head.appendChild(s);
+})();
 </script>
 </body>
 </html>
