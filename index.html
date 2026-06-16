@@ -198,7 +198,7 @@ const CONFIG = {
 
   windows: [
     { id:"win-about", icon:"▣", title:"ABOUT.TXT — Notepad", menu:"About me",
-      x:7, y:11, open:false, type:"text",
+      x:7, y:11, open:true, type:"text",
       content:{
         file:"C:\\AMANDA\\ABOUT.TXT",
         paras:[
@@ -219,9 +219,9 @@ const CONFIG = {
         rows:[
           { lbl:"Email:",  val:"hello@thirdspace.example" },
           { lbl:"Web:",    val:"talktorobots.org" },
-          { lbl:"Status:", val:"ONLINE ▮ accepting projects" },
+          { lbl:"Status:", val:"ONLINE ▮ accepting limited projects (june 26)" },
         ],
-        button:{ label:"Send mail ►", href:"mailto:hello@thirdspace.example" }
+        button:{ label:"Send mail ►", href:"mailto:ops@thirdspaced.com" }
       }
     },
 
@@ -259,19 +259,6 @@ const CONFIG = {
        │    }                                                                │
        │  },                                                                │
        └──────────────────────────────────────────────────────────────────┘ */
-
-    { id:"win-readme", icon:"?", title:"README — how to remix this", menu:"README",
-      x:42, y:9, open:true, type:"text",
-      content:{
-        file:"REMIX GUIDE",
-        paras:[
-          "Everything you see is built from the <span class='k'>CONFIG</span> object at the top of this file. Edit that, save, push — done.",
-          "Add a project: drop one entry into <span class='k'>CONFIG.projects</span>.",
-          "Add a window + 3D icon: add one entry to <span class='k'>CONFIG.windows</span> and one to <span class='k'>CONFIG.desktop</span> with a matching id.",
-          "Never scroll past the <span class='k'>DO NOT EDIT</span> line unless you want to.",
-        ]
-      }
-    },
   ],
 
   projects: [
@@ -320,7 +307,6 @@ const CONFIG = {
     { win:"win-about",    shape:"floppy",   label:"About Me", x:-4.4, y:1.2, z:0,    spin:0.40 },
     { win:"win-projects", shape:"folder",   label:"Projects", x:0,    y:1.7, z:-1.2, spin:0.55 },
     { win:"win-contact",  shape:"envelope", label:"Contact",  x:4.4,  y:1.0, z:0,    spin:0.45 },
-    { win:"win-readme",   shape:"cd",       label:"Read Me",  x:-1.9, y:3.1, z:-2.4, spin:0.80 },
     { win:"win-resume",   shape:"paper",    label:"Résumé",   x:2.6,  y:3.0, z:-2.0, spin:0.50 },
   ],
 
