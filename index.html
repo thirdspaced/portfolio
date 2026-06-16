@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMANDA-OS — Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --face:#c0c0c0; --hi:#ffffff; --sh:#808080; --dk:#404040;
+    --title-a:#000080; --title-b:#1084d0; --grid-magenta:#ff71ce; --y2k-cyan:#01f9f9;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;overflow:hidden;background:#062b2e;}
+  body{font-family:Tahoma,'MS Sans Serif',Geneva,sans-serif;font-size:13px;
+       -webkit-font-smoothing:none;cursor:default;}
+  #scene{position:fixed;inset:0;z-index:0;}
+  #scene canvas{display:block;}
+  #crt{position:fixed;inset:0;z-index:200;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(0,0,0,.13) 0 1px,transparent 1px 3px);}
+  #crt::after{content:'';position:absolute;inset:0;
+    background:radial-gradient(ellipse at center,transparent 58%,rgba(0,0,10,.42) 100%);}
+  #boot{position:fixed;inset:0;z-index:300;background:#000;color:#bdbdbd;
+    font-family:'VT323',monospace;font-size:clamp(15px,2.4vw,21px);
+    padding:32px;white-space:pre-wrap;line-height:1.35;}
+  #boot .amber{color:#ffb000;}
+  #boot.done{animation:bootout .5s steps(4) forwards;}
+  @keyframes bootout{to{opacity:0;visibility:hidden;}}
+  #hint{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:50;
+    font-family:'VT323',monospace;font-size:18px;color:var(--y2k-cyan);
+    background:rgba(0,20,22,.55);border:1px solid var(--y2k-cyan);
+    padding:4px 14px;letter-spacing:1px;animation:blinkin 1.4s steps(2) infinite;}
+  @keyframes blinkin{50%{opacity:.45;}}
+  .win{position:fixed;min-width:260px;max-width:min(560px,92vw);
+    background:var(--face);z-index:20;display:none;
+    border:2px solid;border-color:var(--hi) var(--dk) var(--dk) var(--hi);
+    box-shadow:1px 1px 0 var(--sh),6px 8px 0 rgba(0,0,0,.35);}
+  .win.open{display:block;}
+  .tbar{display:flex;align-items:center;gap:6px;padding:3px 4px;
+    background:linear-gradient(90deg,var(--title-a),var(--title-b));
+    color:#fff;font-weight:bold;cursor:grab;user-select:none;touch-action:none;}
+  .tbar:active{cursor:grabbing;}
+  .tbar .ticon{font-family:'VT323',monospace;font-size:16px;line-height:1;}
+  .tbar .ttl{flex:1;font-size:12px;letter-spacing:.3px;overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap;}
+  .tbtn{width:18px;height:16px;background:var(--face);font-size:10px;line-height:1;
+    font-weight:bold;color:#000;display:grid;place-items:center;cursor:pointer;
+    border:1px solid;border-color:var(--hi) var(--dk) var(--dk) var(--hi);}
+  .tbtn:active{border-color:var(--dk) var(--hi) var(--hi) var(--dk);}
+  .wbody{padding:12px;max-height:min(58vh,460px);overflow:auto;}
+  .wbody.pad0{padding:0;}
+  .notepad{background:#fff;border:2px solid;border-color:var(--sh) var(--hi) var(--hi) var(--sh);
+    font-family:'VT323',monospace;font-size:18px;line-height:1.4;padding:12px;color:#111;}
+  .notepad h2{font-size:22px;color:var(--title-a);margin-bottom:6px;}
+  .notepad p{margin-bottom:10px;}
+  .notepad .k{color:#7a007a;}
+  .files{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));
+    gap:10px;background:#fff;padding:14px;
+    border:2px solid;border-color:var(--sh) var(--hi) var(--hi) var(--sh);}
+  .file{display:flex;flex-direction:column;align-items:center;gap:5px;
+    text-align:center;cursor:pointer;padding:6px 2px;font-size:11px;}
+  .file .fi{font-family:'VT323',monospace;font-size:34px;line-height:1;}
+  .file:hover{background:var(--title-a);color:#fff;}
+  .pdetail{display:none;padding:12px;font-size:12px;line-height:1.5;background:#fff;
+    border-top:2px solid var(--sh);}
+  .pdetail.open{display:block;}
+  .pdetail b{color:var(--title-a);}
+  .stack{font-family:'VT323',monospace;font-size:15px;color:#7a007a;}
+  .btn95{display:inline-block;margin-top:8px;padding:4px 14px;background:var(--face);
+    border:2px solid;border-color:var(--hi) var(--dk) var(--dk) var(--hi);
+    font-size:12px;cursor:pointer;text-decoration:none;color:#000;}
+  .btn95:active{border-color:var(--dk) var(--hi) var(--hi) var(--dk);}
+  .crow{display:flex;gap:8px;margin-bottom:8px;align-items:center;}
+  .crow .lbl{width:64px;font-size:12px;}
+  .crow .val{flex:1;background:#fff;padding:5px 8px;font-family:'VT323',monospace;
+    font-size:16px;border:2px solid;border-color:var(--sh) var(--hi) var(--hi) var(--sh);}
+  #taskbar{position:fixed;left:0;right:0;bottom:0;height:34px;z-index:100;
+    background:var(--face);display:flex;align-items:center;gap:5px;padding:0 4px;
+    border-top:2px solid var(--hi);}
+  #startbtn{display:flex;align-items:center;gap:5px;font-weight:bold;font-size:12px;
+    padding:3px 9px;background:var(--face);cursor:pointer;
+    border:2px solid;border-color:var(--hi) var(--dk) var(--dk) var(--hi);}
+  #startbtn:active,#startbtn.on{border-color:var(--dk) var(--hi) var(--hi) var(--dk);}
+  #startbtn .logo{font-family:'VT323',monospace;color:var(--grid-magenta);font-size:17px;}
+  #tabs{flex:1;display:flex;gap:4px;overflow:hidden;}
+  .tab{max-width:150px;flex:1 1 110px;font-size:11px;padding:3px 8px;cursor:pointer;
+    overflow:hidden;white-space:nowrap;text-overflow:ellipsis;background:var(--face);
+    border:2px solid;border-color:var(--hi) var(--dk) var(--dk) var(--hi);}
+  .tab.active{border-color:var(--dk) var(--hi) var(--hi) var(--dk);
+    background:repeating-conic-gradient(var(--face) 0 25%,#d6d6d6 0 50%) 0 0/4px 4px;font-weight:bold;}
+  #clock{font-size:11px;padding:3px 10px;
+    border:2px solid;border-color:var(--sh) var(--hi) var(--hi) var(--sh);}
+  #startmenu{position:fixed;left:4px;bottom:36px;width:210px;z-index:110;display:none;
+    background:var(--face);border:2px solid;border-color:var(--hi) var(--dk) var(--dk) var(--hi);}
+  #startmenu.open{display:flex;}
+  #startmenu .rail{width:26px;background:linear-gradient(180deg,var(--title-a),var(--grid-magenta));}
+  #startmenu .rail span{writing-mode:vertical-rl;transform:rotate(180deg);color:#fff;
+    font-family:'VT323',monospace;font-size:18px;letter-spacing:2px;display:block;padding:8px 4px;}
+  #startmenu ul{list-style:none;flex:1;padding:4px 0;}
+  #startmenu li{padding:7px 12px;font-size:12px;cursor:pointer;display:flex;gap:9px;align-items:center;}
+  #startmenu li .mi{font-family:'VT323',monospace;font-size:18px;width:18px;}
+  #startmenu li:hover{background:var(--title-a);color:#fff;}
+  #startmenu li.sep{border-top:1px solid var(--sh);border-bottom:1px solid var(--hi);
+    padding:0;height:0;margin:3px 0;}
+  @media (max-width:600px){
+    .win{left:4vw !important;right:4vw;top:12vh !important;max-width:92vw;min-width:0;}
+    #hint{font-size:14px;width:max-content;max-width:90vw;text-align:center;}
+  }
+  @media (prefers-reduced-motion:reduce){ #hint{animation:none;} }
+
+  /* floating 3D-icon captions (classic desktop label look) */
+  #icon-labels{position:fixed;inset:0;z-index:6;pointer-events:none;}
+  .ilabel{position:absolute;transform:translate(-50%,0);white-space:nowrap;
+    font-family:Tahoma,'MS Sans Serif',sans-serif;font-size:12px;color:#fff;
+    padding:1px 6px;letter-spacing:.3px;text-align:center;
+    text-shadow:1px 1px 0 #000, 0 0 4px rgba(0,0,0,.7);
+    transition:opacity .2s;}
+  .ilabel.hot{background:#000080;text-shadow:none;
+    outline:1px dotted #fff;outline-offset:-3px;}
+
+  /* embedded résumé viewer */
+  .pdfframe{width:100%;height:min(52vh,420px);background:#fff;
+    border:2px solid;border-color:var(--sh) var(--hi) var(--hi) var(--sh);}
+</style>
+</head>
+<body>
+<div id="boot"></div>
+<div id="scene"></div>
+<div id="hint">CLICK A FLOATING OBJECT TO OPEN IT ▒</div>
+<div id="crt"></div>
+<div id="icon-labels"></div>
+<div id="windows-root"></div>
+
+<div id="taskbar">
+  <div id="startbtn"><span class="logo">▞▚</span> Start</div>
+  <div id="tabs"></div>
+  <div id="clock">--:--</div>
+</div>
+<div id="startmenu">
+  <div class="rail"><span>AMANDA-OS 95</span></div>
+  <ul id="startlist"></ul>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ╔══════════════════════════════════════════════════════════════════╗
+   ║  CONFIG — THIS IS THE ONLY PART YOU NEED TO EDIT.                  ║
+   ║  Add/remove windows, projects, and 3D icons here. The engine       ║
+   ║  below the "DO NOT EDIT" line reads everything from this object.    ║
+   ╚══════════════════════════════════════════════════════════════════╝ */
+const CONFIG = {
+
+  /* ---- scene look ---- */
+  scene: {
+    sky:        0x0e7b7b,   // background + fog color
+    gridMain:   0xff71ce,   // floor grid lines (near)
+    gridSub:    0x0a5e5e,   // floor grid lines (far)
+    sunDisc:    0xffb000,   // the big horizon sun
+  },
+
+  /* ---- BIOS boot text. Wrap a line in <span class='amber'>…</span> to highlight ---- */
+  boot: [
+    "AMANDA-OS BIOS v4.0  (C) 1995–2026 Third Space Systems",
+    "CPU: Imagination(tm) @ ∞ MHz",
+    "Memory test: 65536 KB OK",
+    "Detecting creative drive .......... OK",
+    "Mounting C:\\PORTFOLIO ............ OK",
+    "Initializing WebGL pipeline ...... OK",
+    "",
+    "<span class='amber'>Starting AMANDA-OS...</span>",
+  ],
+
+  /* ---- WINDOWS. type = 'text' | 'projects' | 'contact'.
+         x / y are starting position in vw / vh. ---- */
+  windows: [
+    { id:"win-about", icon:"▣", title:"ABOUT.TXT — Notepad", menu:"About me",
+      x:7, y:11, open:false, type:"text",
+      content:{
+        file:"C:\\AMANDA\\ABOUT.TXT",
+        paras:[
+          "Hi, I'm <span class='k'>Amanda</span> — founder of Third Space, a consultancy for practical AI implementation and workflow automation. I also run <span class='k'>talktorobots.org</span>, an AI literacy nonprofit, and I teach, speak, and build a lot of small weird internet things on purpose.",
+          "This portfolio runs on AMANDA-OS: one part Windows 95, one part WebGL, zero parts taking itself too seriously.",
+          "<span class='k'>&gt; Last modified: 06/13/2026 — 88,640 bytes</span>",
+        ],
+        // EDIT HERE — your résumé. Drop a resume.pdf next to index.html, or paste a
+        // Google Drive / hosted PDF link here. Opens in a new tab.
+        button:{ label:"📄 Open résumé", href:"resume.pdf" }
+      }
+    },
+
+    { id:"win-projects", icon:"▤", title:"C:\\PROJECTS\\", menu:"Projects",
+      x:30, y:14, open:false, type:"projects" },
+
+    { id:"win-contact", icon:"✉", title:"CONTACT.EXE", menu:"Contact",
+      x:14, y:24, open:false, type:"contact",
+      content:{
+        rows:[
+          { lbl:"Email:",  val:"hello@thirdspace.example" },
+          { lbl:"Web:",    val:"talktorobots.org" },
+          { lbl:"Status:", val:"ONLINE ▮ accepting projects" },
+        ],
+        button:{ label:"Send mail ►", href:"mailto:hello@thirdspace.example" }
+      }
+    },
+
+    { id:"win-resume", icon:"≣", title:"RESUME.PDF", menu:"Résumé",
+      x:50, y:20, open:false, type:"resume",
+      content:{
+        href:"resume.pdf",     // EDIT HERE — drop resume.pdf next to index.html, or paste a link
+        embed:true,            // show the PDF inline; falls back gracefully if the file is missing
+        button:"📄 Open in new tab",
+        note:"My résumé opens as a PDF — click below.",
+        fallback:"Résumé viewer is ready. Drop <span class='k'>resume.pdf</span> next to index.html (or set a link in <span class='k'>CONFIG</span>) and it'll display right here. Until then, this is the placeholder.",
+      }
+    },
+
+    { id:"win-readme", icon:"?", title:"README — how to remix this", menu:"README",
+      x:42, y:9, open:true, type:"text",
+      content:{
+        file:"REMIX GUIDE",
+        paras:[
+          "Everything you see is built from the <span class='k'>CONFIG</span> object at the top of this file. Edit that, save, push — done.",
+          "Add a project: drop one entry into <span class='k'>CONFIG.projects</span>.",
+          "Add a window + 3D icon: add one entry to <span class='k'>CONFIG.windows</span> and one to <span class='k'>CONFIG.desktop</span> with a matching id.",
+          "Never scroll past the <span class='k'>DO NOT EDIT</span> line unless you want to.",
+        ]
+      }
+    },
+  ],
+
+  /* ---- PROJECTS shown inside the Projects folder.
+         icon  = a glyph
+         link  = single url, OR
+         links = [{label, url}, ...] for multiple buttons ---- */
+  projects: [
+    { icon:"▦", name:"GOLDRUSH.EXE", title:"Gold Rush History Game",
+      desc:"An educational history game with a secret Oregon-Trail-style mode — 13 playable historical figures, trail mechanics, and settlement phases. Choices, consequences, and a suspicious amount of dysentery.",
+      stack:"React · Firebase · Vite · Vercel",
+      link:"https://gold-rush-seven.vercel.app" },
+
+    { icon:"✺", name:"ROBOTS.ORG", title:"talktorobots.org",
+      desc:"An AI-literacy nonprofit and prompt library — teaching people to actually talk to AI, with a searchable collection of prompts behind it.",
+      stack:"Wix · Velo · Anthropic API",
+      link:"https://talktorobots.org" },
+
+    { icon:"⎌", name:"UNMERGE.GIT", title:"Emergency Unmerge",
+      desc:"HubSpot says merges are permanent — Emergency Unmerge reverses them. It analyzes property history, timestamps, and associations to reconstruct and separate merged contacts, companies, and deals, with a free scan, bulk unmerge up to 10,000 records, and confidence scores you approve before anything touches your CRM. An official HubSpot Marketplace app.",
+      stack:"HubSpot API · Anthropic Claude · OAuth",
+      links:[
+        { label:"Website", url:"https://emergencyunmerge.com" },
+        { label:"HubSpot Store", url:"https://ecosystem.hubspot.com/marketplace/apps/emergency-unmerge" },
+      ] },
+
+    { icon:"🛡", name:"SAFEMERGE.APP", title:"Safe Merge",
+      desc:"Proactive HubSpot CRM backup and recovery. Safe Merge keeps dated snapshots of every contact, company, and deal, runs 3-stage duplicate detection, and turns the next bad merge or delete into a one-click, same-day restore. Free plan up to 2,000 records. An official HubSpot Marketplace app and sister product to Emergency Unmerge.",
+      stack:"HubSpot API · Anthropic Claude · OAuth",
+      links:[
+        { label:"Website", url:"https://safemerge.app" },
+        { label:"HubSpot Store", url:"https://ecosystem.hubspot.com/marketplace/listing/safe-merge" },
+      ] },
+
+    /* ─── EDIT HERE: still a placeholder — no URL given yet. ─── */
+    { icon:"⊜", name:"SOCRATIC.AI", title:"AI as a Socratic Thought Partner",
+      desc:"[Placeholder] A framework/tool for using AI to ask the right questions instead of handing over answers — discovery-based learning, not autocomplete. Replace with the real description and link.",
+      stack:"TODO — add stack",
+      link:"#" },
+
+    { icon:"▥", name:"CODEX.DAT", title:"Codex",
+      desc:"An AI-powered curriculum developer that weaves digital literacy into any lesson or project. Teachers drop in an existing lesson plan and Codex suggests organic ways to build in coding, cybersecurity awareness, AI critical thinking, and digital creativity — bridging the digital divide without piling onto the prep stack.",
+      stack:"Playlab AI",
+      links:[
+        { label:"Overview", url:"https://www.thirdspaced.com/codex" },
+        { label:"Launch Codex", url:"https://www.playlab.ai/project/cmai9lnsr04gjokihr8pc88cx" },
+      ] },
+  ],
+
+  /* ---- 3D DESKTOP ICONS. Each floating object opens a window.
+         win   = id from CONFIG.windows
+         shape = 'floppy' | 'folder' | 'envelope' | 'cd' | 'paper'
+         label = caption shown floating under the object
+         x,y,z = position in the 3D scene · spin = rotation speed ---- */
+  desktop: [
+    { win:"win-about",    shape:"floppy",   label:"About Me", x:-4.4, y:1.2, z:0,    spin:0.40 },
+    { win:"win-projects", shape:"folder",   label:"Projects", x:0,    y:1.7, z:-1.2, spin:0.55 },
+    { win:"win-contact",  shape:"envelope", label:"Contact",  x:4.4,  y:1.0, z:0,    spin:0.45 },
+    { win:"win-readme",   shape:"cd",       label:"Read Me",  x:-1.9, y:3.1, z:-2.4, spin:0.80 },
+    { win:"win-resume",   shape:"paper",    label:"Résumé",   x:2.6,  y:3.0, z:-2.0, spin:0.50 },
+  ],
+
+  firstOpenDelayMs: 4200,   // when README pops after boot
+};
+
+/* ╔══════════════════════════════════════════════════════════════════╗
+   ║   ↓↓↓   DO NOT EDIT BELOW THIS LINE — this is the engine.   ↓↓↓     ║
+   ╚══════════════════════════════════════════════════════════════════╝ */
+
+/* ---- 1. BUILD WINDOW DOM FROM CONFIG ---- */
+const root = document.getElementById('windows-root');
+function renderBody(w){
+  if(w.type === 'text'){
+    const c = w.content;
+    const btn = c.button
+      ? `<a class="btn95" href="${c.button.href}" target="_blank" rel="noopener">${c.button.label}</a>` : '';
+    return `<div class="wbody"><div class="notepad"><h2>${c.file}</h2>` +
+      c.paras.map(p=>`<p>${p}</p>`).join('') + btn + `</div></div>`;
+  }
+  if(w.type === 'contact'){
+    const c = w.content;
+    const rows = c.rows.map(r=>
+      `<div class="crow"><span class="lbl">${r.lbl}</span><span class="val">${r.val}</span></div>`).join('');
+    const btn = c.button ? `<a class="btn95" href="${c.button.href}">${c.button.label}</a>` : '';
+    return `<div class="wbody">${rows}${btn}</div>`;
+  }
+  if(w.type === 'projects'){
+    return `<div class="wbody pad0"><div class="files" id="filegrid"></div>
+            <div class="pdetail" id="pdetail"></div></div>`;
+  }
+  if(w.type === 'resume'){
+    const c = w.content;
+    const btn = `<a class="btn95" href="${c.href}" target="_blank" rel="noopener">${c.button || '📄 Open résumé'}</a>`;
+    const inner = c.embed
+      ? `<object class="pdfframe" data="${c.href}" type="application/pdf">
+           <div class="notepad"><p>${c.fallback || ''}</p></div>
+         </object>`
+      : `<div class="notepad"><p>${c.note || ''}</p></div>`;
+    return `<div class="wbody"><div id="resume-viewer">${inner}</div>
+            <div style="margin-top:8px">${btn}</div></div>`;
+  }
+  return `<div class="wbody"></div>`;
+}
+CONFIG.windows.forEach(w=>{
+  const el = document.createElement('div');
+  el.className = 'win' + (w.open ? ' open' : '');
+  el.id = w.id;
+  el.style.left = w.x + 'vw';
+  el.style.top  = w.y + 'vh';
+  el.innerHTML =
+    `<div class="tbar"><span class="ticon">${w.icon}</span>
+       <span class="ttl">${w.title}</span>
+       <span class="tbtn" data-min>_</span><span class="tbtn" data-close>×</span></div>` +
+    renderBody(w);
+  root.appendChild(el);
+});
+
+/* if the résumé is set to embed, verify the PDF actually loads;
+   if not (missing file, or local file:// preview), show the friendly fallback */
+(async function probeResume(){
+  const rw = CONFIG.windows.find(w=> w.type === 'resume' && w.content && w.content.embed);
+  if(!rw) return;
+  const box = document.getElementById('resume-viewer');
+  if(!box) return;
+  try{
+    const r = await fetch(rw.content.href, {method:'HEAD'});
+    if(!r.ok) throw new Error('missing');
+  }catch(e){
+    box.innerHTML = `<div class="notepad"><p>${rw.content.fallback ||
+      "Résumé PDF not found yet."}</p></div>`;
+  }
+})();
+
+/* ---- 2. PROJECTS FOLDER content ---- */
+(function(){
+  const grid = document.getElementById('filegrid');
+  const detail = document.getElementById('pdetail');
+  if(!grid) return;
+  CONFIG.projects.forEach(p=>{
+    const f = document.createElement('div');
+    f.className = 'file';
+    f.innerHTML = `<span class="fi">${p.icon}</span>${p.name}`;
+    f.onclick = ()=>{
+      detail.classList.add('open');
+      let buttons = '';
+      if(Array.isArray(p.links)){               // multiple labelled buttons
+        buttons = p.links
+          .filter(l=> l.url && l.url !== '#')
+          .map(l=>`<a class="btn95" href="${l.url}" target="_blank" rel="noopener">${l.label} ►</a>`)
+          .join(' ');
+      } else if(p.link && p.link !== '#'){        // single fallback button
+        buttons = `<a class="btn95" href="${p.link}" target="_blank" rel="noopener">Open ►</a>`;
+      }
+      detail.innerHTML = `<b>${p.title}</b><br>${p.desc}<br>
+        <span class="stack">${p.stack}</span><br>${buttons}`;
+    };
+    grid.appendChild(f);
+  });
+})();
+
+/* ---- 3. START MENU FROM CONFIG ---- */
+(function(){
+  const ul = document.getElementById('startlist');
+  CONFIG.windows.forEach(w=>{
+    const li = document.createElement('li');
+    li.dataset.open = w.id;
+    li.innerHTML = `<span class="mi">${w.icon}</span>${w.menu || w.title}`;
+    li.onclick = ()=>{ openWindow(w.id); closeStart(); };
+    ul.appendChild(li);
+  });
+  const sep = document.createElement('li'); sep.className = 'sep'; ul.appendChild(sep);
+  const sd = document.createElement('li');
+  sd.innerHTML = `<span class="mi">⏻</span>Shut down…`;
+  sd.onclick = ()=> location.reload();
+  ul.appendChild(sd);
+})();
+
+/* ---- 4. BOOT SEQUENCE ---- */
+(function(){
+  const bootEl = document.getElementById('boot');
+  let i = 0;
+  (function type(){
+    if(i < CONFIG.boot.length){
+      bootEl.innerHTML += CONFIG.boot[i] + "\n"; i++;
+      setTimeout(type, i < 3 ? 260 : 180);
+    } else setTimeout(()=> bootEl.classList.add('done'), 600);
+  })();
+})();
+
+/* ---- 5. THREE.JS SCENE ---- */
+const container = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({antialias:false});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+renderer.setSize(innerWidth, innerHeight);
+container.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(CONFIG.scene.sky);
+scene.fog = new THREE.Fog(CONFIG.scene.sky, 14, 34);
+
+const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, .1, 100);
+camera.position.set(0, 1.6, 11);
+
+scene.add(new THREE.AmbientLight(0xffffff, .75));
+const sun = new THREE.DirectionalLight(0xfff3d6, .9); sun.position.set(4,8,6); scene.add(sun);
+const rim = new THREE.DirectionalLight(0xff71ce, .5); rim.position.set(-6,2,-4); scene.add(rim);
+
+const grid3 = new THREE.GridHelper(80, 80, CONFIG.scene.gridMain, CONFIG.scene.gridSub);
+grid3.position.y = -2.2; scene.add(grid3);
+
+const sunDisc = new THREE.Mesh(new THREE.CircleGeometry(5, 32),
+  new THREE.MeshBasicMaterial({color:CONFIG.scene.sunDisc, fog:false, transparent:true, opacity:.85}));
+sunDisc.position.set(0, 2.4, -30); scene.add(sunDisc);
+
+/* ---- 6. SHAPE FACTORY ---- */
+const M = c => new THREE.MeshLambertMaterial({color:c});
+function box(w,h,d,c,x=0,y=0,z=0){
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), M(c));
+  m.position.set(x,y,z); return m;
+}
+const SHAPES = {
+  floppy(){ const g=new THREE.Group();
+    g.add(box(2,2,.22,0x222a86));
+    g.add(box(1.2,.9,.06,0xc8c8c8,0,.5,.13));
+    g.add(box(.45,.6,.02,0x222a86,-.25,.5,.17));
+    g.add(box(1.5,.8,.06,0xfdfdf2,0,-.45,.13));
+    g.add(box(1.3,.1,.02,0xff71ce,0,-.25,.17)); return g; },
+  folder(){ const g=new THREE.Group();
+    g.add(box(2.4,1.6,.3,0xffc94d));
+    g.add(box(1,.35,.3,0xffc94d,-.7,.95,0));
+    g.add(box(2.2,1.3,.12,0xfff3cf,0,-.05,.22)); return g; },
+  envelope(){ const g=new THREE.Group();
+    g.add(box(2.2,1.4,.18,0xf2f2ea));
+    g.add(box(2.2,.12,.2,0xff71ce,0,.64,0));
+    const flap=box(1.55,1.55,.06,0xe2e2d6,0,.18,.1);
+    flap.rotation.z=Math.PI/4; flap.scale.set(1,.62,1); g.add(flap);
+    g.add(box(.5,.34,.04,0x01a0a0,.7,-.4,.12)); return g; },
+  cd(){ const g=new THREE.Group();
+    const disc=new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.1,.07,32),
+      new THREE.MeshPhongMaterial({color:0xd9f6ff, shininess:120, specular:0xff71ce}));
+    disc.rotation.x=Math.PI/2; g.add(disc);
+    const hole=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,.09,16), M(CONFIG.scene.sky));
+    hole.rotation.x=Math.PI/2; g.add(hole); return g; },
+  paper(){ const g=new THREE.Group();
+    g.add(box(1.7,2.2,.08,0xf8f8f0));                 // sheet
+    g.add(box(1.15,.14,.02,0x000080,0,.66,.06));      // title line
+    g.add(box(1.25,.08,.02,0x808080,0,.34,.06));      // body lines
+    g.add(box(1.25,.08,.02,0x808080,0,.16,.06));
+    g.add(box(1.25,.08,.02,0x808080,0,-.02,.06));
+    g.add(box(.75,.08,.02,0x808080,-.25,-.2,.06));
+    g.add(box(1.25,.1,.02,0xff71ce,0,-.55,.06));       // accent line
+    const corner=box(.42,.42,.07,0xd8d8c8,.64,.9,.06); // folded corner
+    corner.rotation.z=Math.PI/4; corner.scale.set(1,.6,1); g.add(corner);
+    return g; },
+};
+
+/* ---- 7. BUILD ICONS FROM CONFIG ---- */
+const icons = [];
+const labelLayer = document.getElementById('icon-labels');
+CONFIG.desktop.forEach(d=>{
+  const make = SHAPES[d.shape] || SHAPES.floppy;
+  const g = make();
+  g.userData = { win:d.win, spin:d.spin, baseY:d.y, phase:Math.random()*Math.PI*2 };
+  g.position.set(d.x, d.y, d.z);
+  scene.add(g); icons.push(g);
+  // floating caption
+  if(d.label){
+    const lab = document.createElement('div');
+    lab.className = 'ilabel';
+    lab.textContent = d.label;
+    labelLayer.appendChild(lab);
+    g.userData.label = lab;
+  }
+});
+
+/* ---- 8. INTERACTION + ANIMATION ---- */
+const ray = new THREE.Raycaster();
+const ptr = new THREE.Vector2(99,99);
+let hovered=null, downPos=null; const par={x:0,y:0};
+addEventListener('pointermove', e=>{
+  ptr.x=(e.clientX/innerWidth)*2-1; ptr.y=-(e.clientY/innerHeight)*2+1;
+  par.x=ptr.x; par.y=ptr.y;
+});
+renderer.domElement.addEventListener('pointerdown', e=>{ downPos=[e.clientX,e.clientY]; });
+renderer.domElement.addEventListener('pointerup', e=>{
+  if(!downPos) return;
+  const moved=Math.hypot(e.clientX-downPos[0], e.clientY-downPos[1]); downPos=null;
+  if(moved>6) return;
+  ptr.x=(e.clientX/innerWidth)*2-1; ptr.y=-(e.clientY/innerHeight)*2+1;
+  ray.setFromCamera(ptr,camera);
+  const hit=ray.intersectObjects(icons,true)[0];
+  if(hit){ let g=hit.object; while(g.parent && !g.userData.win) g=g.parent;
+    if(g.userData.win) openWindow(g.userData.win); }
+});
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clk = new THREE.Clock();
+function animate(){
+  requestAnimationFrame(animate);
+  const t = clk.getElapsedTime();
+  icons.forEach(g=>{
+    if(!reduceMotion){
+      g.rotation.y = t*g.userData.spin;
+      g.position.y = g.userData.baseY + Math.sin(t*1.2+g.userData.phase)*.25;
+    }
+    const s=(g===hovered)?1.18:1;
+    g.scale.lerp(new THREE.Vector3(s,s,s), .15);
+  });
+  ray.setFromCamera(ptr,camera);
+  const hit=ray.intersectObjects(icons,true)[0];
+  let g=hit?hit.object:null; while(g&&g.parent&&!g.userData.win) g=g.parent;
+  hovered=(g&&g.userData.win)?g:null;
+  renderer.domElement.style.cursor = hovered?'pointer':'default';
+  camera.position.x += ((par.x*1.6)-camera.position.x)*.04;
+  camera.position.y += ((1.6+par.y*.8)-camera.position.y)*.04;
+  camera.lookAt(0,1.2,0);
+  updateLabels();
+  renderer.render(scene,camera);
+}
+
+const _lv = new THREE.Vector3();
+function updateLabels(){
+  icons.forEach(g=>{
+    const lab = g.userData.label; if(!lab) return;
+    // project a point ~1.35 units below the (bobbing) object
+    _lv.set(g.position.x, g.position.y - 1.35, g.position.z).project(camera);
+    if(_lv.z > 1){ lab.style.opacity = 0; return; }   // behind camera
+    lab.style.opacity = 1;
+    lab.style.left = ((_lv.x*0.5+0.5)*innerWidth) + 'px';
+    lab.style.top  = ((-_lv.y*0.5+0.5)*innerHeight) + 'px';
+    lab.classList.toggle('hot', g===hovered);
+  });
+}
+
+animate();
+addEventListener('resize', ()=>{
+  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+
+/* ---- 9. WINDOW MANAGER ---- */
+let zTop=20; const tabs=document.getElementById('tabs');
+function openWindow(id){
+  const w=document.getElementById(id); if(!w) return;
+  w.classList.add('open'); focusWindow(w);
+  if(!tabs.querySelector(`[data-tab="${id}"]`)){
+    const tab=document.createElement('div');
+    tab.className='tab'; tab.dataset.tab=id;
+    tab.textContent=w.querySelector('.ttl').textContent;
+    tab.onclick=()=>{
+      if(w.classList.contains('open') && tab.classList.contains('active')){
+        w.classList.remove('open'); tab.classList.remove('active');
+      } else { w.classList.add('open'); focusWindow(w); }
+    };
+    tabs.appendChild(tab);
+  }
+  syncTabs();
+  const hint=document.getElementById('hint'); if(hint) hint.style.display='none';
+}
+function closeWindow(w){
+  w.classList.remove('open');
+  const tab=tabs.querySelector(`[data-tab="${w.id}"]`); if(tab) tab.remove();
+}
+function focusWindow(w){ w.style.zIndex=++zTop; syncTabs(); }
+function syncTabs(){
+  let top=null, topZ=-1;
+  document.querySelectorAll('.win.open').forEach(w=>{
+    const z=+w.style.zIndex||0; if(z>topZ){topZ=z; top=w;}
+  });
+  tabs.querySelectorAll('.tab').forEach(t=>
+    t.classList.toggle('active', top && t.dataset.tab===top.id));
+}
+document.querySelectorAll('.win').forEach(w=>{
+  w.addEventListener('pointerdown', ()=> focusWindow(w));
+  w.querySelector('[data-close]').onclick=()=> closeWindow(w);
+  w.querySelector('[data-min]').onclick=()=>{ w.classList.remove('open'); syncTabs(); };
+  const bar=w.querySelector('.tbar');
+  bar.addEventListener('pointerdown', e=>{
+    if(e.target.classList.contains('tbtn')) return;
+    const r=w.getBoundingClientRect();
+    const ox=e.clientX-r.left, oy=e.clientY-r.top;
+    bar.setPointerCapture(e.pointerId);
+    const move=ev=>{
+      w.style.left=Math.max(0,Math.min(innerWidth-90, ev.clientX-ox))+'px';
+      w.style.top =Math.max(0,Math.min(innerHeight-70, ev.clientY-oy))+'px';
+    };
+    const up=()=>{ bar.removeEventListener('pointermove',move);
+                   bar.removeEventListener('pointerup',up); };
+    bar.addEventListener('pointermove',move);
+    bar.addEventListener('pointerup',up);
+  });
+});
+CONFIG.windows.filter(w=>w.open).forEach(w=> openWindow(w.id));
+
+/* ---- 10. START MENU / CLOCK ---- */
+const startbtn=document.getElementById('startbtn');
+const startmenu=document.getElementById('startmenu');
+function closeStart(){ startmenu.classList.remove('open'); startbtn.classList.remove('on'); }
+startbtn.onclick=e=>{ e.stopPropagation();
+  startmenu.classList.toggle('open'); startbtn.classList.toggle('on'); };
+document.addEventListener('click', e=>{
+  if(!startmenu.contains(e.target) && e.target!==startbtn) closeStart();
+});
+function tick(){
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+}
+tick(); setInterval(tick, 10000);
+
+setTimeout(()=>{
+  const first = CONFIG.windows.find(w=>w.open);
+  if(first) openWindow(first.id);
+}, CONFIG.firstOpenDelayMs);
+</script>
+</body>
+</html>
