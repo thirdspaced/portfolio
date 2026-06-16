@@ -195,9 +195,9 @@ const CONFIG = {
       x:14, y:24, open:false, type:"contact",
       content:{
         rows:[
-          { lbl:"Email:",  val:"hello@thirdspace.example" },
+          { lbl:"Email:",  val:"ops@thirdspaced.com" },
           { lbl:"Web:",    val:"talktorobots.org" },
-          { lbl:"Status:", val:"ONLINE ▮ accepting projects" },
+          { lbl:"Status:", val:"ONLINE ▮ open for select projects (june 26)" },
         ],
         button:{ label:"Send mail ►", href:"mailto:hello@thirdspace.example" }
       }
@@ -206,12 +206,13 @@ const CONFIG = {
     { id:"win-resume", icon:"≣", title:"RESUME.PDF", menu:"Résumé",
       x:50, y:20, open:false, type:"resume",
       content:{
-        href:"resume.pdf",     // EDIT HERE — drop resume.pdf next to index.html, or paste a link
-        embed:true,            // show the PDF inline; falls back gracefully if the file is missing
+        href:"https://www.linkedin.com/in/amandagrutza/",     // EDIT HERE — drop resume.pdf next to index.html, or paste a link
+        embed:false,            // Change to false for external links like LinkedIn
         button:"📄 Open in new tab",
-        note:"My résumé opens as a PDF — click below.",
+        note:"My résumé can be found on LinkedIn.",
         fallback:"Résumé viewer is ready. Drop <span class='k'>resume.pdf</span> next to index.html (or set a link in <span class='k'>CONFIG</span>) and it'll display right here. Until then, this is the placeholder.",
       }
+}
     },
 
     { id:"win-readme", icon:"?", title:"README — how to remix this", menu:"README",
